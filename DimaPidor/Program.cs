@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace DimaPidor
 {
@@ -6,7 +9,8 @@ namespace DimaPidor
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            MyValid mv = new MyValid();
+            Console.WriteLine(mv.IsEmailValid("qwertymail.com"));
         }
     }
 
@@ -28,7 +32,11 @@ namespace DimaPidor
     {
         public override string HashPassword(string password)
         {
-            throw new NotImplementedException();
+            var md5 = MD5.Create();
+            var hash = md5.ComputeHash(Encoding.UTF8.GetBytes(password));
+
+            return Convert.ToBase64String(hash);
+        
         }
 
         public override bool IsDatabaseAccessible(string connectionString)
@@ -38,12 +46,24 @@ namespace DimaPidor
 
         public override bool IsDateValid(string date)
         {
-            throw new NotImplementedException();
+            DateTime dDate;
+            if (DateTime.TryParse(date, out dDate))
+            {
+                return true;
+            }
+            return false;
         }
 
         public override bool IsEmailValid(string email)
         {
-            throw new NotImplementedException();
+            const string pattern = @"\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*";
+            var mail = email.Trim().ToLowerInvariant();
+
+            if (Regex.Match(email, pattern).Success)
+            {
+                return true;
+            }
+            return false;
         }
 
         public override bool IsPasswordValid(string password)
